@@ -47,14 +47,14 @@ func TestCall(t *testing.T) {
 func TestParallelCall(t *testing.T) {
 	type key string
 	var k key = "key"
-	var count uint64
+	var count int64
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func() {
 			var dst interface{}
 			assert.NoError(t, Call(k, &dst, func() interface{} {
-				atomic.AddUint64(&count, 1)
+				atomic.AddInt64(&count, 1)
 				time.Sleep(1 * time.Second)
 				return 1
 			}))
@@ -63,5 +63,27 @@ func TestParallelCall(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-	assert.Equal(t, uint64(1), count)
+	assert.Equal(t, int64(1), count)
+}
+
+func TestParallelCall2(t *testing.T) {
+	expc := 100
+	var count int64
+	var wg sync.WaitGroup
+	for i := 0; i < expc; i++ {
+		i := i
+		wg.Add(1)
+		go func() {
+			var dst interface{}
+			assert.NoError(t, Call(i, &dst, func() interface{} {
+				atomic.AddInt64(&count, 1)
+				time.Sleep(1 * time.Second)
+				return i
+			}))
+			assert.Equal(t, i, dst)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	assert.Equal(t, int64(expc), count)
 }
