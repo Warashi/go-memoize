@@ -67,6 +67,7 @@ func TestParallelCall(t *testing.T) {
 }
 
 func TestParallelCall2(t *testing.T) {
+	type key int
 	expc := 100
 	var count int64
 	var wg sync.WaitGroup
@@ -75,7 +76,7 @@ func TestParallelCall2(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			var dst interface{}
-			assert.NoError(t, Call(i, &dst, func() interface{} {
+			assert.NoError(t, Call(key(i), &dst, func() interface{} {
 				atomic.AddInt64(&count, 1)
 				time.Sleep(1 * time.Second)
 				return i
