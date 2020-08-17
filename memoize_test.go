@@ -16,10 +16,9 @@ func TestCall(t *testing.T) {
 		f   func() interface{}
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantDst interface{}
-		wantErr bool
+		name string
+		args args
+		want interface{}
 	}{
 		{
 			name: "Normal Case",
@@ -29,17 +28,14 @@ func TestCall(t *testing.T) {
 					return 1
 				},
 			},
-			wantDst: 1,
-			wantErr: false,
+			want: 1,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var dst interface{}
-			err := Call(tt.args.key, &dst, tt.args.f)
-			if !assert.Equal(t, tt.wantDst, dst) {
+			actual := Call(tt.args.key, tt.args.f)
+			if !assert.Equal(t, tt.want, actual) {
 			}
-			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
 }
@@ -52,13 +48,12 @@ func TestParallelCall(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func() {
-			var dst interface{}
-			assert.NoError(t, Call(k, &dst, func() interface{} {
+			actual := Call(k, func() interface{} {
 				atomic.AddInt64(&count, 1)
 				time.Sleep(1 * time.Second)
 				return 1
-			}))
-			assert.Equal(t, 1, dst)
+			})
+			assert.Equal(t, 1, actual)
 			wg.Done()
 		}()
 	}
@@ -75,13 +70,12 @@ func TestParallelCall2(t *testing.T) {
 		i := i
 		wg.Add(1)
 		go func() {
-			var dst interface{}
-			assert.NoError(t, Call(key(i), &dst, func() interface{} {
+			actual := Call(i, func() interface{} {
 				atomic.AddInt64(&count, 1)
 				time.Sleep(1 * time.Second)
 				return i
-			}))
-			assert.Equal(t, i, dst)
+			})
+			assert.Equal(t, i, actual)
 			wg.Done()
 		}()
 	}

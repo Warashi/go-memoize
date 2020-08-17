@@ -32,18 +32,12 @@ type Memoize struct {
 	done sync.Map
 }
 
-func (m *Memoize) Call(key interface{}, dst interface{}, f func() (ret interface{})) (err error) {
-	rdst := reflect.ValueOf(dst)
-	if rdst.Kind() != reflect.Ptr || rdst.IsNil() {
-		return &InvalidCallError{Type: reflect.TypeOf(dst)}
-	}
-
+func (m *Memoize) Call(key interface{}, f func() (ret interface{})) interface{} {
 	ret, ok := m.memo.Load(key)
 	if !ok {
 		ret = m.call(key, f)
 	}
-	rdst.Elem().Set(reflect.ValueOf(ret))
-	return nil
+	return ret
 }
 
 func (m *Memoize) call(key interface{}, f func() (ret interface{})) (ret interface{}) {
@@ -61,6 +55,6 @@ func (m *Memoize) call(key interface{}, f func() (ret interface{})) (ret interfa
 }
 
 // Call memoize and call function f, then store return value to dst
-func Call(key interface{}, dst interface{}, f func() interface{}) error {
-	return Default.Call(key, dst, f)
+func Call(key interface{}, f func() interface{}) interface{} {
+	return Default.Call(key, f)
 }
