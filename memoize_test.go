@@ -70,7 +70,7 @@ func TestParallelCall2(t *testing.T) {
 		i := i
 		wg.Add(1)
 		go func() {
-			actual := Call(i, func() interface{} {
+			actual := Call(key(i), func() interface{} {
 				atomic.AddInt64(&count, 1)
 				time.Sleep(1 * time.Second)
 				return i
