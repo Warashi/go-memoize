@@ -1,30 +1,12 @@
 package memoize
 
 import (
-	"reflect"
 	"sync"
 )
 
 var (
 	Default Memoize
 )
-
-// An InvalidCallError describes an invalid argument passed to Call.
-// (The argument to Call must be a non-nil pointer.)
-type InvalidCallError struct {
-	Type reflect.Type
-}
-
-func (e *InvalidCallError) Error() string {
-	if e.Type == nil {
-		return "memoize: dst is (nil)"
-	}
-
-	if e.Type.Kind() != reflect.Ptr {
-		return "memoize: dst is (non-pointer " + e.Type.String() + ")"
-	}
-	return "memoize: dst is (nil " + e.Type.String() + ")"
-}
 
 type Memoize struct {
 	memo sync.Map
